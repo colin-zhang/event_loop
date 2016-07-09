@@ -25,13 +25,13 @@ typedef enum {
                               epoll_wait(2) will always wait for this event;
                                it is not necessary to set it in events.*/
     DEV_EPOLLHUP   =  EPOLLHUP,/*Hang up happened on the associated file descriptor. 
-    						  epoll_wait(2) will always wait for this event; 
-    						  it is not necessary to set it in events.*/
+                              epoll_wait(2) will always wait for this event; 
+                              it is not necessary to set it in events.*/
 
     DEV_EPOLLET    =  EPOLLET,/*Sets the Edge Triggered behavior for the associated file descriptor. 
-    						 The default behavior for epoll is Level Triggered. 
-    						 See epoll(7) for more detailed information about Edge 
-    						 and Level Triggered event distribution architectures.*/
+                             The default behavior for epoll is Level Triggered. 
+                             See epoll(7) for more detailed information about Edge 
+                             and Level Triggered event distribution architectures.*/
        
     DEV_EPOLLONESHOT  =  EPOLLONESHOT,
 } dev_epoll_type_t;

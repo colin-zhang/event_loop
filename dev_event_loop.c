@@ -25,7 +25,6 @@ dev_event_list_creat(int num)
     return list;
 }
 
-
 int 
 dev_event_list_get_num(dev_event_list_t *list)
 {
@@ -57,7 +56,6 @@ dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr)
 
     return 0;
 }
-
 
 int 
 dev_event_list_remove(dev_event_list_t *list, dev_event_t *event_ptr) 
@@ -172,7 +170,6 @@ dev_event_loop_run(dev_event_loop_t* loop)
 
     return 0;
 }
-
 
 int 
 dev_event_loop_add(dev_event_loop_t* loop, dev_event_t *event_ptr)

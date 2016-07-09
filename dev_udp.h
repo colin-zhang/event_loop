@@ -1,0 +1,15 @@
+#ifndef _DEV_UDP_H
+#define _DEV_UDP_H 
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int dev_udp_port_creat(int id, unsigned short port, int if_broad);
+int dev_udp_client_creat(int if_broad);
+int dev_udp_client_creat_con(int server_id, unsigned short server_port);
+int dev_udp_send_con(int sockfd, char *msg, int msg_len);
+int dev_udp_receive_con(int sockfd, char *rsv, int rsv_len);
+int dev_udp_send_to_id(int sockfd, int id, unsigned short port, char *msg, int msg_len);
+int dev_udp_send(int sockfd, char *msg, int msg_len, struct sockaddr_in *peer_addr);
+int dev_udp_receive(int sockfd, char *rsv, int rsv_len, struct sockaddr_in *peer_addr);
+
+#endif

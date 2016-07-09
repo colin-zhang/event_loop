@@ -128,17 +128,121 @@ dev_event_timer_creat(void *data)
     return ev_ptr;
 }
 
-int main(int argc, char const *argv[])
+
+void 
+help(void)
 {
+    fprintf(stdout, 
+            "-i, the ID"
+            "-p, port"
+            "-s, server"
+            "-c, client");
+    fflush(stdout);
+}
+
+
+/*
+    //dev_event_set_ep_type(ev1, DEV_EPOLLET | EPOLLIN);
+    g_ev1 = dev_event_timer_creat(NULL);
+   
+    dev_event_loop_add(dev_event_deafult_loop(), g_ev1);
+
+
+*/
+
+
+int 
+udp_server_read_handler(void *ptr)
+{
+
+    return 0;
+}
+
+
+int
+udp_server_event_set(void *data)
+{
+/*    dev_event_t *ev_ptr = NULL;
+
+    ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, 0);
+    if (ev_ptr == NULL) {
+        fprintf(stderr, "ERROR: dev_event_creat\n");
+        return -1;
+    }
+
+    dev_event_set_data(ev_ptr, data, udp_server_read_handler, NULL);*/
+
+    //dev_event_loop_add(dev_event_deafult_loop(), g_ev1);
+
+    return 0;
+}
+
+
+int 
+udp_client_read_handler(void *ptr)
+{
+
+    return 0;
+}
+
+
+int
+udp_clint_event(void *data)
+{
+/*    dev_event_t *ev_ptr = NULL;
+    DEV_DECL_FD(ptr, fd);
+
+    ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, 0);
+    if (ev_ptr == NULL) {
+        fprintf(stderr, "ERROR: dev_event_creat\n");
+        return NULL;
+    }
+
+    dev_event_set_data(ev_ptr, data, udp_client_read_handler, NULL);*/
+
+    //dev_event_loop_add(dev_event_deafult_loop(), g_ev1);
+
+    return 0;
+}
+
+
+
+int main(int argc, char *argv[])
+{   
+    int opt;
+    int id, type, port;
+
+    if (argc < 4) {
+        help();
+        return 0;
+    }
+
+    while( (opt = getopt(argc, argv, "i:p:sc")) != -1) {
+        switch(opt) {
+        case 'i':
+            id = atoi(optarg);
+            break;
+        case 'p':
+            port = atoi(optarg);
+            break;
+        case 's':
+            type = 0;
+            break;
+        case 'c':
+            type = 1;
+            break;
+        }
+    }
+
+
+    
 
     if (dev_event_deafult_loop_init(100) == NULL) {
         fprintf(stderr, "Fail to create deafult loop\n");
         exit(-1);
     }
-    //dev_event_set_ep_type(ev1, DEV_EPOLLET | EPOLLIN);
-    g_ev1 = dev_event_timer_creat(NULL);
-   
-    dev_event_loop_add(dev_event_deafult_loop(), g_ev1);
+
+
 
     dev_event_loop_run(dev_event_deafult_loop());
     
