@@ -24,5 +24,8 @@ typedef struct _dev_event_loop
 dev_event_loop_t * dev_event_loop_creat(int max_event);
 int dev_event_loop_run(dev_event_loop_t* loop);
 int dev_event_loop_add(dev_event_loop_t* loop, dev_event_t *event_ptr);
+int dev_event_loop_remove(dev_event_loop_t* loop, dev_event_t *event_ptr);
+dev_event_loop_t * dev_event_deafult_loop_init(int max_event);
+dev_event_loop_t * dev_event_deafult_loop(void);
 
 #endif

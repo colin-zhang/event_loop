@@ -1,9 +1,12 @@
 #include "dev_event_loop.h"
+#include "dev_event_def.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+
+static dev_event_loop_t * deafult_loop = NULL;
 
 dev_event_list_t* 
 dev_event_list_creat(int num) 
@@ -23,6 +26,12 @@ dev_event_list_creat(int num)
 }
 
 
+int 
+dev_event_list_get_num(dev_event_list_t *list)
+{
+    return list->event_cnt;
+}
+
 void 
 dev_event_list_destroy(dev_event_list_t *list) {
     dev_event_t *ev_ptr = NULL;
@@ -37,6 +46,7 @@ dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr)
     }
 
     if (list->head == NULL) {
+        dev_event_set_next(event_ptr, NULL);
         list->head = event_ptr;
         list->tail = event_ptr;
     } else {
@@ -48,6 +58,37 @@ dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr)
     return 0;
 }
 
+
+int 
+dev_event_list_remove(dev_event_list_t *list, dev_event_t *event_ptr) 
+{
+    dev_event_t *ev_ptr = NULL;
+    dev_event_t *ev_ptr2 = NULL;
+
+    if (list == NULL || event_ptr == NULL) {
+        return -1;
+    }
+
+    if (list->head == event_ptr) {
+        list->head = dev_event_get_next(list->head);
+        list->event_cnt--;
+        return 0;
+    }
+
+    ev_ptr = list->head;
+    ev_ptr2 = dev_event_get_next(ev_ptr);
+
+    while (ev_ptr2) {
+        if (ev_ptr2 == event_ptr) {
+            dev_event_set_next(ev_ptr, dev_event_get_next(ev_ptr2));
+            list->event_cnt--;
+            return 0;
+        }
+        ev_ptr = ev_ptr2;
+        ev_ptr2 = dev_event_get_next(ev_ptr);
+    }
+    return 1;
+}
 
 
 dev_event_t *
@@ -81,19 +122,19 @@ dev_event_loop_creat(int max_event)
     loop->ev_max = max_event;
     loop->ep_fd = epoll_create1(0);
     if (loop->ep_fd == -1) {
-        fprintf(stderr, "create epoll error:%s\n", strerror(errno));
+        dbg_Print("create epoll:%s\n", strerror(errno));
         return NULL;
     }
 
     loop->ep_events = (struct epoll_event *)calloc(max_event, sizeof(struct epoll_event));
     if (loop->ep_events == NULL) {
-        fprintf(stderr, "No enough memory for loop->ep_events\n");
+        dbg_Print("No enough memory for loop->ep_events\n");
         return NULL;
     }
 
     loop->event_list = dev_event_list_creat(max_event);
     if (loop->event_list == NULL) {
-        fprintf(stderr, "No enough memory for loop->ep_events\n");
+        dbg_Print("No enough memory for loop->ep_events\n");
         return NULL;
     }
 
@@ -114,7 +155,7 @@ dev_event_loop_run(dev_event_loop_t* loop)
         if (num == -1) {
             if (errno == EINTR)
                 continue;
-            fprintf(stderr, "ERROR: epoll wait error: %s\n", strerror(errno));
+            dbg_Print("epoll_wait: %s\n", strerror(errno));
             return -1;
         }
         for (i = 0; i < num; i++) {
@@ -152,31 +193,60 @@ dev_event_loop_add(dev_event_loop_t* loop, dev_event_t *event_ptr)
         ev.data.fd = ev_fd;
         ev.events  = ep_type;
         if(-1 == epoll_ctl(loop->ep_fd, EPOLL_CTL_ADD, ev_fd, &ev)) {
-            fprintf(stderr, "ERROR: epoll_ctl add in ev_register: %s\n", strerror(errno));
+            dbg_Print("epoll_ctl: %s\n", strerror(errno));
             return -1;
         }
     } else {
-
+        dbg_Print("exist");
     }
     
     dev_event_set_property(event_ptr, 1);
+
     return 0;
 }
 
 int 
-dev_event_loop_remove()
+dev_event_loop_remove(dev_event_loop_t* loop, dev_event_t *event_ptr)
+{
+    struct epoll_event ev;
+    int fd;
+
+    dbg_Print("list num = %d \n", dev_event_list_get_num(loop->event_list));
+    dev_event_list_remove(loop->event_list, event_ptr);
+    dbg_Print("list num = %d \n", dev_event_list_get_num(loop->event_list));
+
+    fd = dev_event_get_fd(event_ptr);
+    if (-1 == epoll_ctl(loop->ep_fd, EPOLL_CTL_DEL, fd, &ev)) {
+        dbg_Print("epoll_ctl: %s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int 
+dev_event_loop_pause(dev_event_loop_t* loop, dev_event_t *event_ptr)
 {
     return 0;
 }
 
 int 
-dev_event_loop_pause()
+dev_event_loop_resume(dev_event_loop_t* loop, dev_event_t *event_ptr)
 {
     return 0;
 }
 
-int 
-dev_event_loop_resume()
+
+dev_event_loop_t * 
+dev_event_deafult_loop_init(int max_event)
 {
-    return 0;
+    if (deafult_loop == NULL) {
+        deafult_loop = dev_event_loop_creat(max_event);
+    }
+    return deafult_loop;
+}
+
+dev_event_loop_t * 
+dev_event_deafult_loop(void)
+{
+    return deafult_loop;
 }

@@ -42,8 +42,6 @@ typedef void (*destroy_t)(void *);
 struct _dev_event_t;
 typedef struct _dev_event_t dev_event_t;
 
-#define DECL_PRIV(event_ptr, priv) priv_data_t* priv = (priv_data_t*)(event_ptr->priv)
-
 void* dev_event_get_priv(dev_event_t *event_ptr);
 void* dev_event_get_data(dev_event_t *event_ptr);
 int   dev_event_get_fd(dev_event_t *event_ptr);
@@ -60,5 +58,9 @@ void dev_event_set_data(dev_event_t *event_ptr, void *data, handler_t handler, d
 void dev_event_set_property(dev_event_t *event_ptr, bool handing);
 void dev_event_set_ep_type(dev_event_t *event_ptr, dev_epoll_type_t ep_type);
 void dev_event_set_next(dev_event_t *curr, dev_event_t *next);
+
+#define DEV_DECL_PRIV(event_ptr, priv) priv_data_t* priv = (priv_data_t*)(dev_event_get_priv(event_ptr))
+#define DEV_DECL_FD(event_ptr, fd)   int fd = (int)(dev_event_get_fd(event_ptr))
+#define DEV_DECL_DATA(event_ptr, type, data)   (type *) data = (type *)(dev_event_get_data(event_ptr))
 
 #endif
