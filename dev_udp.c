@@ -111,7 +111,7 @@ dev_udp_send_to_id(int sockfd, int id, unsigned short port, char *msg, int msg_l
 
     ret = sendto(sockfd, msg, msg_len, 0, (struct sockaddr *)&servaddr, addrlen);
 
-    return 0;
+    return ret;
 }
 
 
@@ -123,7 +123,7 @@ dev_udp_send(int sockfd, char *msg, int msg_len, struct sockaddr_in *peer_addr)
 
     ret = sendto(sockfd, msg, msg_len, 0, (struct sockaddr *)peer_addr, addrlen);
 
-    return 0;
+    return ret;
 }
 
 
@@ -134,7 +134,7 @@ dev_udp_receive(int sockfd, char *rsv, int rsv_len, struct sockaddr_in *peer_add
     socklen_t addrlen = sizeof(struct sockaddr_in);
 
     ret = recvfrom(sockfd, rsv, rsv_len, 0, (struct sockaddr *)peer_addr, &addrlen);
-    return 0;
+    return ret;
 }
 
 
