@@ -1,7 +1,6 @@
 #ifndef _DEV_UDP_H
 #define _DEV_UDP_H 
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <arpa/inet.h>
 
 int dev_udp_port_creat(int id, unsigned short port, int if_broad);
 int dev_udp_client_creat(int if_broad);

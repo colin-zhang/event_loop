@@ -1,6 +1,5 @@
 #include "dev_event_def.h"
 
-
 //#ifdef DEV_IPC_FIFO
 //O_RDWR|O_NONBLOCK
 
@@ -12,7 +11,7 @@ int dev_open_fifo(int ipc_chn, int flag)
     char fifo_path[512];
 
     if( !dev_file_exist(DEV_IPC_FILE_DIR)) {
-        dev_make_dir(DEV_IPC_FILE_DIR, 0766);
+        dev_make_dir(DEV_IPC_FILE_DIR, 0666);
     }
 
     snprintf(fifo_path, sizeof(fifo_path), "%s/fifo_%d_.ipc", DEV_IPC_FILE_DIR, ipc_chn);
@@ -28,7 +27,7 @@ int dev_open_fifo(int ipc_chn, int flag)
     }
 
     if (mk_flag) {
-        ret = mkfifo(fifo_path, 0766);
+        ret = mkfifo(fifo_path, 0666);
         if( ret < 0) { 
             return -1;
         }
@@ -44,7 +43,7 @@ int dev_open_fifo(int ipc_chn, int flag)
 int dev_read_fifo(int rd_fd, char *data_buf, int len){
 
     int ret;
-    ret = read(rd_fd, data_buf, len);
+    ret = readn(rd_fd, data_buf, len);
     return ret;
 }
 
@@ -80,7 +79,7 @@ int dev_write_fifo(int wt_fd, void *data_buf,int data_len)
 {   
     int ret = 0;
     char *d = (char *)data_buf;
-    ret = write(wt_fd, d, data_len);
+    ret = writen(wt_fd, d, data_len);
     return ret;
 }
 
@@ -115,7 +114,6 @@ dev_unix_socket_bind(int ipc_chn)
     return sockfd;
 }  
 
-
 int 
 dev_unix_socket_open(int ipc_chn)
 {  
@@ -140,6 +138,7 @@ dev_unix_socket_open(int ipc_chn)
 
     return sockfd;
 }  
+
 int 
 dev_unix_socket_send(int sockfd, int ipc_chn, char *msg, int msg_len)
 {  
@@ -156,8 +155,6 @@ dev_unix_socket_send(int sockfd, int ipc_chn, char *msg, int msg_len)
 
     return ret;
 } 
-
-
 
 int 
 dev_unix_socket_receive(int sockfd, char *msg, int len)  

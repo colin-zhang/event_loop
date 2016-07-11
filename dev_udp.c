@@ -43,7 +43,6 @@ dev_udp_port_creat(int id, unsigned short port, int if_broad)
     return sockfd;
 }
 
-
 int 
 dev_udp_client_creat(int if_broad)
 {
@@ -83,7 +82,6 @@ dev_udp_client_creat_con(int server_id, unsigned short server_port)
     return sockfd;
 }
 
-
 int 
 dev_udp_send_con(int sockfd, char *msg, int msg_len)
 {
@@ -95,7 +93,6 @@ dev_udp_receive_con(int sockfd, char *rsv, int rsv_len)
 {
     return readn(sockfd, rsv, rsv_len);
 }
-
 
 int 
 dev_udp_send_to_id(int sockfd, int id, unsigned short port, char *msg, int msg_len)
@@ -114,7 +111,6 @@ dev_udp_send_to_id(int sockfd, int id, unsigned short port, char *msg, int msg_l
     return ret;
 }
 
-
 int 
 dev_udp_send(int sockfd, char *msg, int msg_len, struct sockaddr_in *peer_addr)
 {
@@ -126,7 +122,6 @@ dev_udp_send(int sockfd, char *msg, int msg_len, struct sockaddr_in *peer_addr)
     return ret;
 }
 
-
 int 
 dev_udp_receive(int sockfd, char *rsv, int rsv_len, struct sockaddr_in *peer_addr)
 {
@@ -136,5 +131,3 @@ dev_udp_receive(int sockfd, char *rsv, int rsv_len, struct sockaddr_in *peer_add
     ret = recvfrom(sockfd, rsv, rsv_len, 0, (struct sockaddr *)peer_addr, &addrlen);
     return ret;
 }
-
-

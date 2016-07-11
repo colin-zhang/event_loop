@@ -10,7 +10,7 @@ AR = $(CROSS_COMPILE)ar
 
 OBJS = $(patsubst $(notdir %.c), $(BUILD_DIR)/%.o, $(PRJ_SRC))
 
-CFLAGS  += -Wall -Wno-unused-variable
+CFLAGS  += -Wall -Wno-unused-variable $(PRJ_CFLAG)
 LDFLAGS += $(PRJ_LDFLAG)
 ifeq "$(PRJ_DEBUG)" "yes"
 CFLAGS  += -ggdb -g3 -o0
@@ -30,6 +30,10 @@ static:$(OBJS)
 
 shared:$(OBJS)
 	$(CC) -shared -fPIC $(LDFLAGS) -o $(TARGET).so $^
+
+
+$(OBJS):$(BUILD_DIR)/%.o:$(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -o $@  -c $<
 
 .c.o:
 	$(CC) $(CFLAGS) -o $@  -c $<

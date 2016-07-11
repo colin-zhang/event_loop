@@ -150,6 +150,8 @@ dev_make_dir(const char* dir, mode_t mode)
 }
 
 
+//io阻塞时，先获得io的长度再读
+
 ssize_t                     /* Write "n" bytes to a descriptor. */
 writen(int fd, const void *vptr, size_t n)
 {
