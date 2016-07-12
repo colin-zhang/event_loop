@@ -13,6 +13,7 @@ PRJ_SRC = dev_event.c \
 	dev_ipc.c \
 	dev_udp.c \
 	dev_if_so.c \
+	
 
 PRJ_CFLAG = -D UWARE_DEFAULT_IP_DOMAIN=\"192.168.11.0\"
 
