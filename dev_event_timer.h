@@ -1,4 +1,5 @@
 #include <sys/timerfd.h>
+#include <stdint.h>
 
 typedef int  (*timer_handler_t)(void *);
 

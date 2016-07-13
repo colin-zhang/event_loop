@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 #ifndef UWARE_DEFAULT_IP_DOMAIN
-#define UWARE_DEFAULT_IP_DOMAIN 192.168.168.0
+#define UWARE_DEFAULT_IP_DOMAIN "192.168.168.0"
 #endif
 
 int 

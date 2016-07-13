@@ -1,5 +1,8 @@
-#include <sys/timerfd.h>
 #include "dev_event.h"
+#include "dev_event_def.h"
+#include "dev_event_timer.h"
+#include <sys/timerfd.h>
+#include <stdio.h>
 #include <string.h>
 
 #define ONE_SECOND 1000000000
@@ -49,7 +52,6 @@ get_it_itimerspec(struct itimerspec *spec, double it_timeout, double interval_ti
 }
 
 
-
 int dev_event_timer_handler(void *ptr)
 {
 	void * data = (void *)dev_event_get_data(ptr);
@@ -68,19 +70,19 @@ dev_event_timer_creat(int num, void *data)
 
 	if ((fd = timerfd_create(CLOCK_MONOTONIC, 0)) < 0) {
 		dbg_Print("timerfd_create\n");
-		return -1;
+		return NULL;
 	}
 
 	memset(&newValue, 0, sizeof(newValue));
 
 	if (timerfd_settime(fd, 0, &newValue, NULL) != 0) {
 		dbg_Print("timerfd_settime\n");
-		return -1;
+		return NULL;
 	}
 	ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, sizeof(priv_data_t));
 	if (ev_ptr == NULL) {
 		dbg_Print("dev_event_creat\n");
-		return -1;
+		return NULL;
 	}
 
 	DEV_DECL_PRIV(ev_ptr, priv);
@@ -96,7 +98,7 @@ dev_event_timer_creat(int num, void *data)
 
 
 
-dev_event_timer_add(int num, void *data)
-{
+// dev_event_timer_add(int num, void *data)
+// {
 
-}
+// }
