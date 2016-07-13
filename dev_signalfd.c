@@ -12,7 +12,7 @@ dev_signalfd_handler(void *ptr)
     struct signalfd_siginfo fdsi;  
     int s;
     DEV_DECL_FD(ptr, fd);
-    s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));  
+    s = read(fd, &fdsi, sizeof(struct signalfd_siginfo));  
     if (s != sizeof(struct signalfd_siginfo)) {
         return -1;
     }       
