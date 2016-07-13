@@ -5,6 +5,7 @@
 #include <sys/timerfd.h>
 #include "dev_event_loop.h"
 #include "dev_event.h"
+#include "dev_signalfd.h"
 
 #define ONE_SECOND 1000000000
 
@@ -139,6 +140,8 @@ int main(int argc, char const *argv[])
     g_ev1 = dev_event_timer_creat(NULL);
    
     dev_event_loop_add(dev_event_deafult_loop(), g_ev1);
+
+    dev_event_loop_add(dev_event_deafult_loop(), dev_defualt_signalfd(NULL));
 
     dev_event_loop_run(dev_event_deafult_loop());
     

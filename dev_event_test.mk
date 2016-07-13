@@ -7,6 +7,8 @@ endif
 
 PRJ_SRC = dev_event.c \
 	dev_event_loop.c \
+    dev_signalfd.c \
 	dev_event_test.c \
+
 
 include ./std.mk
