@@ -1,17 +1,17 @@
 #include "dev_event.h"
 #include "dev_event_def.h"
 #include "dev_event_timer.h"
+#include "dev_heap.h"
 #include <sys/timerfd.h>
 #include <stdio.h>
 #include <string.h>
+
 
 #define ONE_SECOND 1000000000
 
 typedef struct _priv_date_t
 {
-	dev_timer_ev_t **heap;
-	int size;
-	int count;
+    dev_heap_t *tm_heap;
 } priv_data_t;
 
 
@@ -27,7 +27,7 @@ get_it_timespec(double timeout)
     return ts;
 }
 
-int 
+static int 
 dev_set_relative_timerfd(int fd, double it_timeout, double interval_timeout)
 {
     struct itimerspec newValue;
@@ -43,59 +43,107 @@ dev_set_relative_timerfd(int fd, double it_timeout, double interval_timeout)
 }
 
 
-struct itimerspec *
-get_it_itimerspec(struct itimerspec *spec, double it_timeout, double interval_timeout) 
+static struct itimerspec *
+set_it_itimerspec(struct itimerspec *spec, double it_timeout, double interval_timeout) 
 {
     spec->it_value = get_it_timespec(it_timeout);
     spec->it_interval = get_it_timespec(interval_timeout);
     return spec;
 }
 
-
-int dev_event_timer_handler(void *ptr)
+static int 
+timespec_cmp(struct timespec ts1, struct timespec ts2)
 {
-	void * data = (void *)dev_event_get_data(ptr);
+    if (ts1.tv_sec > ts2.tv_sec) {
+        return 1;
+    }
+    else if (ts1.tv_sec == ts2.tv_sec) {
+        if (ts1.tv_nsec > ts2.tv_nsec) {
+            return 1;
+        }
+        else if (ts1.tv_nsec == ts2.tv_nsec) {
+            return 0;
+        }
+        else {
+            return -1;
+        }
+    }
+    else {
+        return -1;
+    }
+}
 
-	
-	printf("%s\n", "ev1_handler");
-	return 0;
+
+static int 
+dev_event_timer_cmp_l(void *ev1, void *ev2)
+{
+    int ret = 0;
+    ret = timespec_cmp(((dev_timer_ev_t *)ev1)->ts, ((dev_timer_ev_t *)ev2)->ts);
+    if (ret >= 0) {
+        return 0;
+    }
+
+    return 1;
+}
+
+
+int 
+dev_event_timer_handler(void *ptr)
+{
+    void * data = (void *)dev_event_get_data(ptr);
+    DEV_DECL_PRIV(ptr, priv);
+
+    dev_heap_t * tm_heap = priv->tm_heap;
+
+
+    
+    printf("%s\n", "ev1_handler");
+    return 0;
 }
 
 dev_event_t *
 dev_event_timer_creat(int num, void *data)
 {
-	dev_event_t *ev_ptr;
-	struct itimerspec newValue;
-	int fd;
+    dev_event_t *ev_ptr;
+    struct itimerspec newValue;
+    int fd;
 
-	if ((fd = timerfd_create(CLOCK_MONOTONIC, 0)) < 0) {
-		dbg_Print("timerfd_create\n");
-		return NULL;
-	}
+    if ((fd = timerfd_create(CLOCK_MONOTONIC, 0)) < 0) {
+        dbg_Print("timerfd_create\n");
+        return NULL;
+    }
 
-	memset(&newValue, 0, sizeof(newValue));
+    set_it_itimerspec(&newValue, 0, 0);
 
-	if (timerfd_settime(fd, 0, &newValue, NULL) != 0) {
-		dbg_Print("timerfd_settime\n");
-		return NULL;
-	}
-	ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, sizeof(priv_data_t));
-	if (ev_ptr == NULL) {
-		dbg_Print("dev_event_creat\n");
-		return NULL;
-	}
+    if (timerfd_settime(fd, 0, &newValue, NULL) != 0) {
+        dbg_Print("timerfd_settime\n");
+        return NULL;
+    }
+    ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, sizeof(priv_data_t));
+    if (ev_ptr == NULL) {
+        dbg_Print("dev_event_creat\n");
+        return NULL;
+    }
 
-	DEV_DECL_PRIV(ev_ptr, priv);
-	priv->count = 0;
-	priv->heap = calloc(num, sizeof(dev_timer_ev_t));
-	priv->size = num;
+    DEV_DECL_PRIV(ev_ptr, priv);
+    priv->tm_heap = dev_heap_creat(num, dev_event_timer_cmp_l);
 
-	dev_set_relative_timerfd(fd, 0, 0);
-	dev_event_set_data(ev_ptr, data, dev_event_timer_handler, NULL);
+    dev_set_relative_timerfd(fd, 0, 0);
+    dev_event_set_data(ev_ptr, data, dev_event_timer_handler, NULL);
 
-	return ev_ptr;
+    return ev_ptr;
 }
 
+int
+dev_event_timer_add(dev_event_t *ev, dev_timer_ev_t *tm)
+{
+    DEV_DECL_PRIV(ev, priv);
+    dev_heap_t * tm_heap = priv->tm_heap;
+
+    dev_heap_add(tm_heap, tm);
+
+    return 0;
+}
 
 
 // dev_event_timer_add(int num, void *data)

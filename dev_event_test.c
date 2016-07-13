@@ -6,7 +6,7 @@
 #include "dev_event_loop.h"
 #include "dev_event.h"
 
-#define ONESECOND 1000000000
+#define ONE_SECOND 1000000000
 
 dev_event_t *g_ev1, *g_ev2;
 char *g_ev1_prt;
@@ -43,7 +43,7 @@ static struct timespec
 get_it_timespec(double timeout) 
 {
     long long int sec = (long long int)timeout;
-    long long int nsec = (long long int)((timeout - (double)sec) * ONESECOND);
+    long long int nsec = (long long int)((timeout - (double)sec) * ONE_SECOND);
     struct timespec ts;
 
     ts.tv_sec = sec;
