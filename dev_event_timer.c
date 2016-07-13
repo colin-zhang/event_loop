@@ -146,7 +146,7 @@ dev_event_timer_cmp_l(void *ev1, void *ev2)
 }
 
 
-int 
+static int 
 dev_event_timer_handler(void *ptr)
 {
     struct itimerspec newValue;
@@ -178,8 +178,6 @@ dev_event_timer_handler(void *ptr)
         return -1;
     }
 
-    
-    printf("%s\n", "ev1_handler");
     return 0;
 }
 
@@ -245,8 +243,19 @@ dev_event_timer_add(dev_event_t *ev, dev_timer_ev_t *tm)
     return 0;
 }
 
+dev_timer_ev_t * 
+dev_sub_timer_creat(double timeout, char repeat, timer_handler_t handler, void * data)
+{
+    dev_timer_ev_t *sub_timer = calloc(1, sizeof(dev_timer_ev_t));
+    if (sub_timer == NULL) {
+        return NULL;
+    }
 
-// dev_event_timer_add(int num, void *data)
-// {
+    sub_timer->timeout = timeout;
+    sub_timer->cb = handler;
+    sub_timer->ptr = data;
+    sub_timer->repeat = repeat;
 
-// }
+    return sub_timer;
+}
+

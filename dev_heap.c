@@ -6,7 +6,7 @@
 #define HEAP_LCHLD(i) (i << 1)
 #define HEAP_RCHLD(i) ((i << 1) | 1)
 #define HEAP_PARNT(i) (i >> 1)
-#define HEAP_SIZE(h) (h->size)
+#define HEAP_SIZE(h)  (h->size)
 
 
 dev_heap_t *
@@ -20,7 +20,7 @@ dev_heap_creat(int size, dev_heap_cmp_t cmp)
     }
     heap->array_size = size;
     heap->size = 0;
-    heap->array = calloc(size ,sizeof(heap->array));
+    heap->array = calloc(size, sizeof(heap->array));
     if (heap->array == NULL) {
         return NULL;
     }
