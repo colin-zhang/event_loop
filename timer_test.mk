@@ -18,5 +18,6 @@ PRJ_SRC = dev_event.c \
 	
 
 #PRJ_CFLAG 
+PRJ_LDFLAG = -lrt
 
 include ${MK_DIR}/std.mk

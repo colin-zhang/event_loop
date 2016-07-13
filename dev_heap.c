@@ -67,8 +67,9 @@ dev_heap_tricle_down(dev_heap_t *heap, int index)
 }
 
 void *
-dev_heap_top(dev_heap_t *heap)
+dev_heap_get_top(dev_heap_t *heap)
 {
+    dev_heap_tricle_down(heap, 1);
     return heap->array[1];
 }
 

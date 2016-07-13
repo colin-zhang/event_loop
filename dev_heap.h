@@ -15,7 +15,7 @@ typedef struct _dev_heap
 
 
 dev_heap_t * dev_heap_creat(int size, dev_heap_cmp_t cmp);
-void * dev_heap_top(dev_heap_t *heap);
+void * dev_heap_get_top(dev_heap_t *heap);
 void dev_heap_pop(dev_heap_t *heap);
 void dev_heap_add(dev_heap_t *heap, void *data);
 void dev_heap_destory(dev_heap_t *heap);
