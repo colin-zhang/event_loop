@@ -161,11 +161,11 @@ dev_event_timer_handler(void *ptr)
     {
         get_current_timespec(&priv->ts_curr);
         if (timespec_cmp(&priv->ts_curr, &tm->ts) >= 0 ) {
-            if (tm->cb != NULL) {
+            if (tm->cb != NULL && tm->repeat >= 0) {
                 tm->cb(data, tm->ptr);
             }
             tm->ts = get_it_timespec_timeout(tm->timeout);
-            if (tm->repeat == 1) {
+            if (tm->repeat == 1 || tm->repeat < 0) {
                 dev_heap_pop(tm_heap);
             } else if (tm->repeat > 1){
                 tm->repeat--;
@@ -267,5 +267,11 @@ dev_sub_timer_creat(double timeout, char repeat, timer_handler_t handler, void *
     sub_timer->repeat = repeat;
 
     return sub_timer;
+}
+
+void 
+dev_sub_timer_remove(dev_timer_ev_t * sub_timer)
+{
+    sub_timer->repeat = -1;
 }
 
