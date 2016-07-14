@@ -170,6 +170,11 @@ dev_event_timer_handler(void *ptr)
         }
     }
 
+    if (tm == NULL) {
+        dev_set_relative_timerfd(fd, 0, 0);
+        return 0;
+    }
+
     get_current_timespec(&priv->ts_curr);
 
     memset(&newValue, 0, sizeof(newValue));
