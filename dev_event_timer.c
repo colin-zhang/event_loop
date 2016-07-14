@@ -165,6 +165,11 @@ dev_event_timer_handler(void *ptr)
                 tm->cb(data, tm->ptr);
             }
             tm->ts = get_it_timespec_timeout(tm->timeout);
+            if (tm->repeat == 1) {
+                dev_heap_pop(tm_heap);
+            } else if (tm->repeat > 1){
+                tm->repeat--;
+            }
         } else {
             break;
         }
