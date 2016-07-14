@@ -10,6 +10,7 @@ int dev_make_dir(const char* dir, int mode);
 bool dev_is_fifo(const char *file);
 bool dev_is_dir(const char *path);
 int dev_get_file_size(const char *path);
+char * dev_file_mmap(const char *path , int size);
 
 ssize_t writen(int fd, const void *vptr, size_t n);
 ssize_t readn(int fd, void *vptr, size_t n);

@@ -1,9 +1,10 @@
 #include <sys/stat.h>
 #include <sys/statfs.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -147,6 +148,25 @@ dev_make_dir(const char* dir, mode_t mode)
     }
    
     return 0;
+}
+
+
+char *
+dev_file_mmap(const char *path , int size)
+{
+    int fd;  
+    void *ptr;
+
+    if((fd = open(path, O_RDWR)) < 0 )   
+    {   
+        return NULL;  
+    }   
+
+    ftruncate(fd, size);
+    ptr = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);  
+    close(fd);
+   
+    return ptr;
 }
 
 
