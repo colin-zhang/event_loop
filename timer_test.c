@@ -8,15 +8,16 @@
 
 
 int 
-timer1_hander(void *ptr)
+timer1_hander(void *ptr, void *ptr_self)
 {
-    fprintf(stdout, "timer1_hander\n");
+    fprintf(stdout, "timer ev:%s\n", (char *)ptr);
+    fprintf(stdout, "timer1_hander: %s\n", (char *)ptr_self);
     return 0;
 }
 
 
 int 
-timer2_hander(void *ptr)
+timer2_hander(void *ptr, void *ptr_self)
 {
     fprintf(stdout, "timer2_hander\n");
     return 0;
@@ -32,13 +33,17 @@ int main(int argc, char const *argv[])
         exit(-1);
     }
 
-    timer_ev = dev_event_timer_creat(100, NULL);
+    char *ev_ptr = malloc(512);
+    snprintf(ev_ptr, 512, "timer event\n");    
+    timer_ev = dev_event_timer_creat(100, ev_ptr);
     if (timer_ev == NULL) {
         fprintf(stderr, "%s\n", "timer event creat error\n");
         exit(-1);
     }
 
-    timer1 = dev_sub_timer_creat(2.1, 0, timer1_hander, NULL);
+    char *timer1_ptr = malloc(512);
+    snprintf(timer1_ptr, 512, "timer 1 test \n");
+    timer1 = dev_sub_timer_creat(2.1, 0, timer1_hander, timer1_ptr);
     if (timer1 == NULL) {
         fprintf(stderr, "%s\n", "sub timer creat error\n");
         exit(-1);

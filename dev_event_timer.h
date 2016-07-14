@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "dev_event.h"
 
-typedef int  (*timer_handler_t)(void *);
+typedef int  (*timer_handler_t)(void *ev_data, void *self_data);
 
 
 typedef struct _dev_timer_ev_t 

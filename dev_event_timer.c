@@ -162,7 +162,7 @@ dev_event_timer_handler(void *ptr)
         get_current_timespec(&priv->ts_curr);
         if (timespec_cmp(&priv->ts_curr, &tm->ts) >= 0 ) {
             if (tm->cb != NULL) {
-                tm->cb(data);
+                tm->cb(data, tm->ptr);
             }
             tm->ts = get_it_timespec_timeout(tm->timeout);
         } else {
