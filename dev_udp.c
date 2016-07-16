@@ -15,6 +15,7 @@
 
 #include "dev_if_so.h"
 #include "dev_common.h"
+#include "dev_event_def.h"
 
 int 
 dev_udp_port_creat(int id, unsigned short port, int if_broad) 
@@ -31,19 +32,21 @@ dev_udp_port_creat(int id, unsigned short port, int if_broad)
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(port);
+    
     if (if_broad) {
-        servaddr.sin_addr.s_addr = inet_addr(INADDR_ANY);
-        dev_socket_set_broad_cast(sockfd, 1);
+        servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        //dev_socket_set_broad_cast(sockfd, 1);
     } else {
         dev_get_addr_by_id(id, &servaddr);
     }
-    
+
     ret = bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
     if (ret < 0) {
+        dbg_Print("bind:%s\n", strerror(errno));
         close(sockfd);
         return ret;
     }
-
+   
     return sockfd;
 }
 

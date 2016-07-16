@@ -14,6 +14,13 @@
 #ifndef UWARE_DEFAULT_IP_DOMAIN
 #define UWARE_DEFAULT_IP_DOMAIN "192.168.168.0"
 #endif
+static char base_ip[32] = {"192.168.168.0"};
+
+int 
+dev_set_base_ip(const char* bip)
+{
+    return snprintf(base_ip, sizeof(base_ip), "%s", bip);
+}
 
 int 
 dev_afinet_pton(char *ip, struct sockaddr_in *addr)

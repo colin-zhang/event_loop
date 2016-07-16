@@ -152,7 +152,7 @@ udp_server_event(int id, int port)
     struct udp_server_data *server_data;
     int fd = 0;
 
-    fd = dev_udp_port_creat(id, port, 0);
+    fd = dev_udp_port_creat(id, port, g_if_broad_cast);
     ev_srv = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN , 0);
     if (ev_srv == NULL) {
         dbg_Print("ev_srv, dev_event_creat\n");
@@ -290,14 +290,14 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-
-    if (if_bsc && type == 1) {
+    if (if_bsc) {
         g_if_broad_cast = 1;
-        id = 255;
+        if (type == 1) {
+            id = 255;
+        }      
     }
 
     printf("id = %d, port = %d, type = %d \n", id , port, type);
-
 
     switch(type) {
         case 0:
