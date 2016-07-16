@@ -31,9 +31,13 @@ dev_udp_port_creat(int id, unsigned short port, int if_broad)
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(port);
-    dev_get_addr_by_id(id, &servaddr);
+    if (if_broad) {
+        servaddr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+        dev_socket_set_broad_cast(sockfd, 1);
+    } else {
+        dev_get_addr_by_id(id, &servaddr);
+    }
     
-    dev_socket_set_broad_cast(sockfd, if_broad);
     ret = bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
     if (ret < 0) {
         close(sockfd);
