@@ -16,8 +16,8 @@ ifeq "$(PRJ_DEBUG)" "yes"
 CFLAGS  += -ggdb -g3 -o0
 endif
 
-
-all:${PRJ_TARGET_TYPE}
+all:$(TARGET)
+$(TARGET):$(PRJ_TARGET_TYPE)
 ifeq "$(PRJ_TARGET_TYPE)" "shared"
 CFLAGS += -fPIC
 endif
@@ -33,10 +33,11 @@ shared:$(OBJS)
 
 
 $(OBJS):$(BUILD_DIR)/%.o:$(SRC_DIR)/%.c
+	@if [ ! -e $(@D) ]; then mkdir $(@D); fi
 	$(CC) $(CFLAGS) -o $@  -c $<
 
 .c.o:
 	$(CC) $(CFLAGS) -o $@  -c $<
 
 clean:
-	rm -rf *.o $(TARGET).a $(TARGET) $(TARGET).so
+	rm -rf  $(TARGET) $(OBJS)
