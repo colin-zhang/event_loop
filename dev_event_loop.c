@@ -5,10 +5,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include "dev_event.h"
 
 static dev_event_loop_t * deafult_loop = NULL;
 
-dev_event_list_t* 
+static dev_event_list_t* 
 dev_event_list_creat(int num) 
 {
     dev_event_list_t *list = NULL;
@@ -25,19 +26,19 @@ dev_event_list_creat(int num)
     return list;
 }
 
-int 
+static inline int 
 dev_event_list_get_num(dev_event_list_t *list)
 {
     return list->event_cnt;
 }
 
-void 
+static inline void 
 dev_event_list_destroy(dev_event_list_t *list) {
     dev_event_t *ev_ptr = NULL;
 
 }
 
-int 
+static inline int 
 dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr) 
 {
     if (list == NULL || event_ptr == NULL) {
@@ -57,7 +58,7 @@ dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr)
     return 0;
 }
 
-int 
+static inline int 
 dev_event_list_remove(dev_event_list_t *list, dev_event_t *event_ptr) 
 {
     dev_event_t *ev_ptr = NULL;
@@ -88,8 +89,7 @@ dev_event_list_remove(dev_event_list_t *list, dev_event_t *event_ptr)
     return 1;
 }
 
-
-dev_event_t *
+static inline dev_event_t *
 dev_event_list_find_by_fd(dev_event_list_t *list, int fd) 
 {
     dev_event_t *ev_ptr = NULL;
@@ -118,7 +118,8 @@ dev_event_loop_creat(int max_event)
     loop = (dev_event_loop_t *)calloc(1, sizeof(dev_event_loop_t));
 
     loop->ev_max = max_event;
-    loop->ep_fd = epoll_create1(0);
+    //loop->ep_fd = epoll_create1(0);
+    loop->ep_fd = epoll_create(max_event);
     if (loop->ep_fd == -1) {
         dbg_Print("create epoll:%s\n", strerror(errno));
         return NULL;
@@ -213,6 +214,8 @@ dev_event_loop_remove(dev_event_loop_t* loop, dev_event_t *event_ptr)
     dbg_Print("list num = %d \n", dev_event_list_get_num(loop->event_list));
 
     fd = dev_event_get_fd(event_ptr);
+    ev.data.fd = fd;
+    ev.events = dev_event_get_ep_type(event_ptr);
     if (-1 == epoll_ctl(loop->ep_fd, EPOLL_CTL_DEL, fd, &ev)) {
         dbg_Print("epoll_ctl: %s\n", strerror(errno));
         return -1;
@@ -223,6 +226,19 @@ dev_event_loop_remove(dev_event_loop_t* loop, dev_event_t *event_ptr)
 int 
 dev_event_loop_pause(dev_event_loop_t* loop, dev_event_t *event_ptr)
 {
+    dev_epoll_type_t ev_type;
+    struct epoll_event ev;
+    int fd;
+
+    fd = dev_event_get_fd(event_ptr);
+    ev.data.fd = fd;
+    ev_type = dev_event_get_ep_type(event_ptr);
+    if (ev_type & DEV_EPOLLIN) ev_type &= (~DEV_EPOLLIN);
+    ev.events = ev_type;
+    if (-1 == epoll_ctl(loop->ep_fd, EPOLL_CTL_MOD, fd, &ev)) {
+        dbg_Print("epoll_ctl: %s\n", strerror(errno));
+        return -1;
+    }
     return 0;
 }
 
@@ -231,7 +247,6 @@ dev_event_loop_resume(dev_event_loop_t* loop, dev_event_t *event_ptr)
 {
     return 0;
 }
-
 
 dev_event_loop_t * 
 dev_event_deafult_loop_init(int max_event)

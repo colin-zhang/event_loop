@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <stdint.h>
 
 #define ONE_SECOND  1000000000
 #define ONE_MSECOND 1000000
@@ -18,8 +18,7 @@ typedef struct _priv_date_t
     struct timespec ts_curr;
 } priv_data_t;
 
-
-static int 
+static inline int 
 timespec_cmp(struct timespec *ts1, struct timespec *ts2)
 {
     if (ts1->tv_sec > ts2->tv_sec) {
@@ -76,7 +75,6 @@ get_it_timespec_timeout(double timeout)
     return ts;
 }
 
-
 static inline struct timespec 
 dec_timespec_minus(struct timespec *tsb, struct timespec *tss) 
 {
@@ -108,8 +106,7 @@ dev_timerfd_relative_set(int fd, struct itimerspec *newValue)
     return timerfd_settime(fd, 0, newValue, NULL);
 }
 
-
-static int 
+static inline int 
 dev_set_relative_timerfd(int fd, double it_timeout, double interval_timeout)
 {
     struct itimerspec newValue;
@@ -124,8 +121,7 @@ dev_set_relative_timerfd(int fd, double it_timeout, double interval_timeout)
     return 0;
 }
 
-
-static struct itimerspec *
+static inline struct itimerspec *
 set_it_itimerspec(struct itimerspec *spec, double it_timeout, double interval_timeout) 
 {
     spec->it_value = get_it_timespec(it_timeout);
@@ -133,7 +129,7 @@ set_it_itimerspec(struct itimerspec *spec, double it_timeout, double interval_ti
     return spec;
 }
 
-static int 
+static inline int 
 dev_event_timer_cmp_l(void *ev1, void *ev2)
 {
     int ret = 0;
@@ -145,8 +141,7 @@ dev_event_timer_cmp_l(void *ev1, void *ev2)
     return 1;
 }
 
-
-static int 
+static inline int 
 dev_event_timer_handler(void *ptr)
 {
     struct itimerspec newValue;
@@ -156,6 +151,9 @@ dev_event_timer_handler(void *ptr)
 
     dev_heap_t * tm_heap = priv->tm_heap;
     dev_timer_ev_t *tm;
+
+    uint64_t exp;
+    read(fd, &exp, sizeof(exp));
 
     while ((tm = dev_heap_get_top(tm_heap))) 
     {
@@ -209,7 +207,7 @@ dev_event_timer_creat(int num, void *data)
         dbg_Print("timerfd_settime\n");
         return NULL;
     }
-    ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN | DEV_EPOLLET, sizeof(priv_data_t));
+    ev_ptr = dev_event_creat(fd, DEV_EVENT_TIMER, EPOLLIN /*| DEV_EPOLLET */, sizeof(priv_data_t));
     if (ev_ptr == NULL) {
         dbg_Print("dev_event_creat\n");
         return NULL;
@@ -275,3 +273,9 @@ dev_sub_timer_remove(dev_timer_ev_t * sub_timer)
     sub_timer->repeat = -1;
 }
 
+void 
+dev_sub_timer_modify_timeout(dev_timer_ev_t *tm, double timeout)
+{
+    tm->timeout = (double)timeout;
+    tm->ts = get_it_timespec_timeout(tm->timeout);
+}
