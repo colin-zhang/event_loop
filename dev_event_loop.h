@@ -4,21 +4,14 @@
 #include "dev_event.h"
 #include <sys/epoll.h>
 
-typedef struct _dev_event_list 
-{
-    int event_cnt;
-    int event_max;
-    dev_event_t *head;
-    dev_event_t *tail;
-} dev_event_list_t;
+typedef int  (*loop_cb_t)(void *, uint32_t);
 
-
-typedef struct _dev_event_loop
+typedef struct _dev_ev_loop
 {
     int ep_fd;
     int ev_max;
     struct epoll_event *ep_events;
-    dev_event_list_t *event_list;
+    loop_cb_t cb;
 } dev_event_loop_t;
 
 dev_event_loop_t * dev_event_loop_creat(int max_event);

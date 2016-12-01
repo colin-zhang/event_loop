@@ -1,5 +1,17 @@
 #include "dev_event.h"
 
+
+typedef int  (*handler_t)(void *, uint32_t);
+
+struct _dev_event_t 
+{
+    int fd;
+    uint32_t  events;
+    handler_t handler;
+    void *data;
+    char priv[0];
+};
+
 dev_event_t* 
 dev_event_creat(int fd, dev_event_type_t type, dev_epoll_type_t ep_type, int priv_len)
 {

@@ -9,116 +9,14 @@
 
 static dev_event_loop_t * deafult_loop = NULL;
 
-static dev_event_list_t* 
-dev_event_list_creat(int num) 
-{
-    dev_event_list_t *list = NULL;
-
-    list = calloc(1, sizeof(dev_event_list_t));
-    if (list == NULL) {
-        return NULL;
-    }
-    list->event_cnt = 0;
-    list->event_max = num;
-    list->head = NULL;
-    list->tail = NULL;
-
-    return list;
-}
-
-static inline int 
-dev_event_list_get_num(dev_event_list_t *list)
-{
-    return list->event_cnt;
-}
-
-static inline void 
-dev_event_list_destroy(dev_event_list_t *list) {
-    dev_event_t *ev_ptr = NULL;
-
-}
-
-static inline int 
-dev_event_list_add(dev_event_list_t *list, dev_event_t *event_ptr) 
-{
-    if (list == NULL || event_ptr == NULL) {
-        return -1;
-    }
-
-    if (list->head == NULL) {
-        dev_event_set_next(event_ptr, NULL);
-        list->head = event_ptr;
-        list->tail = event_ptr;
-    } else {
-        dev_event_set_next(list->tail, event_ptr);
-        list->tail = event_ptr;
-    }
-    list->event_cnt++;
-
-    return 0;
-}
-
-static inline int 
-dev_event_list_remove(dev_event_list_t *list, dev_event_t *event_ptr) 
-{
-    dev_event_t *ev_ptr = NULL;
-    dev_event_t *ev_ptr2 = NULL;
-
-    if (list == NULL || event_ptr == NULL) {
-        return -1;
-    }
-
-    if (list->head == event_ptr) {
-        list->head = dev_event_get_next(list->head);
-        list->event_cnt--;
-        return 0;
-    }
-
-    ev_ptr = list->head;
-    ev_ptr2 = dev_event_get_next(ev_ptr);
-
-    while (ev_ptr2) {
-        if (ev_ptr2 == event_ptr) {
-            dev_event_set_next(ev_ptr, dev_event_get_next(ev_ptr2));
-            list->event_cnt--;
-            return 0;
-        }
-        ev_ptr = ev_ptr2;
-        ev_ptr2 = dev_event_get_next(ev_ptr);
-    }
-    return 1;
-}
-
-static inline dev_event_t *
-dev_event_list_find_by_fd(dev_event_list_t *list, int fd) 
-{
-    dev_event_t *ev_ptr = NULL;
-
-    if (list == NULL) {
-        return NULL;
-    } else {
-        ev_ptr = list->head;
-    }
-
-    while (ev_ptr) {
-        if (dev_event_get_fd(ev_ptr) == fd) {
-            break;
-        } else {
-            ev_ptr = dev_event_get_next(ev_ptr);
-        }
-    }
-
-    return ev_ptr;
-}
 
 dev_event_loop_t * 
-dev_event_loop_creat(int max_event) 
+dev_event_loop_creat(int max_event, loop_cb_t cb) 
 {
     dev_event_loop_t *loop;
     loop = (dev_event_loop_t *)calloc(1, sizeof(dev_event_loop_t));
 
     loop->ev_max = max_event;
-    //loop->ep_fd = epoll_create1(0);
     loop->ep_fd = epoll_create(max_event);
     if (loop->ep_fd == -1) {
         dbg_Print("create epoll:%s\n", strerror(errno));
@@ -130,24 +28,14 @@ dev_event_loop_creat(int max_event)
         dbg_Print("No enough memory for loop->ep_events\n");
         return NULL;
     }
-
-    loop->event_list = dev_event_list_creat(max_event);
-    if (loop->event_list == NULL) {
-        dbg_Print("No enough memory for loop->ep_events\n");
-        return NULL;
-    }
-
+    loop->cb = cb;
     return loop;
 }
 
 int 
 dev_event_loop_run(dev_event_loop_t* loop) 
 {
-    int i, num, fd;
-    dev_event_t *ev_ptr = NULL;
-    handler_t handler;
-    void * handle_ptr = NULL;
-    bool handling;
+    int i, num;
 
     for(;;) {
         num = epoll_wait(loop->ep_fd, loop->ep_events, loop->ev_max, -1);
@@ -158,13 +46,30 @@ dev_event_loop_run(dev_event_loop_t* loop)
             return -1;
         }
         for (i = 0; i < num; i++) {
-            fd = loop->ep_events[i].data.fd;
-            ev_ptr = dev_event_list_find_by_fd(loop->event_list, fd);
-            if (ev_ptr) {
-                handler = dev_event_get_handler(ev_ptr, &handle_ptr, &handling);
-                if (handler != NULL && handle_ptr != NULL && handling) {
-                    handler(handle_ptr);
+            struct epoll_event *ev = &loop->ep_events[i];
+            uint32_t events = 0;
+
+            if (ev) {
+                if (ev->events & EPOLLERR) {
+                    events |= EVENT_ERR;
                 }
+
+                if (ev->events & (EPOLLIN | EPOLLHUP)) {
+                    events |= EVENT_READ;
+                }
+
+                if (ev->events & EPOLLOUT) {
+                    events |= EVENT_WRITE;
+                }
+               
+                if (ev->data.ptr) {
+                    dev_event_t *dev_event = (dev_event_t *)ev->data.ptr;
+                    dev_event->handler(ev->, events);
+                }
+                
+                
+                handler(ev->data.ptr, events)
+
             }
         }
     }
