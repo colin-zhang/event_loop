@@ -1,4 +1,15 @@
-#include "dev_event_def.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <poll.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "dev_common.h"
 
 //#ifdef DEV_IPC_FIFO
 //O_RDWR|O_NONBLOCK

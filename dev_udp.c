@@ -11,11 +11,11 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <arpa/inet.h>
 
 #include "dev_if_so.h"
 #include "dev_common.h"
-#include "dev_event_def.h"
 
 int 
 dev_udp_port_creat(int id, unsigned short port, int if_broad) 
@@ -42,7 +42,7 @@ dev_udp_port_creat(int id, unsigned short port, int if_broad)
 
     ret = bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
     if (ret < 0) {
-        dbg_Print("bind:%s\n", strerror(errno));
+        printf("bind:%s\n", strerror(errno));
         close(sockfd);
         return ret;
     }

@@ -10,11 +10,14 @@ AR = $(CROSS_COMPILE)ar
 
 OBJS = $(patsubst $(notdir %.c), $(BUILD_DIR)/%.o, $(PRJ_SRC))
 
-CFLAGS  += -Wall -Wno-unused-variable $(PRJ_CFLAG)
+
 LDFLAGS += $(PRJ_LDFLAG)
 ifeq "$(PRJ_DEBUG)" "yes"
-CFLAGS  += -ggdb -g3 -o0
+CFLAGS  += -ggdb -g3 -O0
+else
+CFLAGS  += -o2
 endif
+CFLAGS  += -Wall -Werror -Wno-unused -Wno-unused-variable $(PRJ_CFLAG)
 
 all:$(TARGET)
 $(TARGET):$(PRJ_TARGET_TYPE)
@@ -33,7 +36,7 @@ shared:$(OBJS)
 
 
 $(OBJS):$(BUILD_DIR)/%.o:$(SRC_DIR)/%.c
-	@if [ ! -e $(@D) ]; then mkdir $(@D); fi
+	@if [ ! -e $(@D) ]; then mkdir -p $(@D); fi
 	$(CC) $(CFLAGS) -o $@  -c $<
 
 .c.o:

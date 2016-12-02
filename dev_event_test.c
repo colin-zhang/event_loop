@@ -9,6 +9,7 @@
 
 #define ONE_SECOND 1000000000
 
+dev_event_loop_t *Loop = NULL;
 dev_event_t *g_ev1, *g_ev2;
 char *g_ev1_prt;
 
@@ -129,14 +130,18 @@ dev_event_timer_creat(void *data)
     return ev_ptr;
 }
 
+int 
+ev_loop_cb(void *data, uint32_t events)
+{
+    dev_event_t *ev = (dev_event_t *)data;
+    ev->handler_t(data);
+}
+
 int main(int argc, char const *argv[])
 {
 
-    if (dev_event_deafult_loop_init(100) == NULL) {
-        fprintf(stderr, "Fail to create deafult loop\n");
-        exit(-1);
-    }
-    //dev_event_set_ep_type(ev1, DEV_EPOLLET | EPOLLIN);
+    Loop = dev_event_loop_creat(10, ev_loop_cb);
+
     g_ev1 = dev_event_timer_creat(NULL);
    
     dev_event_loop_add(dev_event_deafult_loop(), g_ev1);

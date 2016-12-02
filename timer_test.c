@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "dev_event_timer.h"
-#include "dev_event_loop.h"
 #include "dev_event.h"
+#include "dev_event_timer.h"
 
-
-int 
+int
 timer1_hander(void *ptr, void *ptr_self)
 {
     fprintf(stdout, "timer ev:%s", (char *)ptr);
@@ -32,15 +30,22 @@ timer3_hander(void *ptr, void *ptr_self)
 }
 
 
+int 
+ev_loop_cb(void *data, uint32_t events)
+{
+    dev_event_t *ev = (dev_event_t *)data;
+    ev->handler(data);
+    return 0;
+}
+
+dev_event_loop_t *Loop = NULL;
+
 int main(int argc, char const *argv[])
 {
     dev_event_t *timer_ev = NULL;
     dev_timer_ev_t *timer1 = NULL, *timer2 = NULL, *timer3 = NULL;
 
-    if (dev_event_deafult_loop_init(100) == NULL) {
-        fprintf(stderr, "Fail to create deafult loop\n");
-        exit(-1);
-    }
+    Loop = dev_event_loop_creat(10, ev_loop_cb);
 
     char *ev_ptr = malloc(512);
     snprintf(ev_ptr, 512, "public\n");    
@@ -58,13 +63,11 @@ int main(int argc, char const *argv[])
         exit(-1);
     }
 
-
     timer2 = dev_sub_timer_creat(4.1, 0, timer2_hander, NULL);
     if (timer2 == NULL) {
         fprintf(stderr, "%s\n", "sub timer creat error\n");
         exit(-1);
     }
-
 
     timer3 = dev_sub_timer_creat(4.1, 0, timer3_hander, timer1_ptr);
     if (timer3 == NULL) {
@@ -76,9 +79,9 @@ int main(int argc, char const *argv[])
     dev_event_timer_add(timer_ev, timer2);
     dev_event_timer_add(timer_ev, timer3);
    
-    dev_event_loop_add(dev_event_deafult_loop(), timer_ev);
+    dev_event_loop_add(Loop, timer_ev);
 
-    dev_event_loop_run(dev_event_deafult_loop());
+    dev_event_loop_run(Loop);
     
     return 0;
 }
